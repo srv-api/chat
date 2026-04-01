@@ -2,7 +2,8 @@
 package ws
 
 import (
-	"log"
+	"encoding/json"
+	"srv-api/chat/services/roomchat"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,28 +14,32 @@ type Client struct {
 	Send chan []byte
 }
 
-func (c *Client) ReadPump(hub *Hub) {
+func (c *Client) ReadPump(hub *Hub, service roomchat.ChatService) {
 	defer func() {
 		hub.Unregister <- c
 		c.Conn.Close()
 	}()
 
 	for {
-		_, message, err := c.Conn.ReadMessage()
+		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
-			log.Println("read error:", err)
 			break
 		}
 
-		hub.Broadcast <- message
+		data, err := service.ProcessMessage(msg)
+		if err != nil {
+			continue
+		}
+
+		_ = service.SaveMessage(*data)
+
+		out, _ := json.Marshal(data)
+		hub.SendToUser(data.ReceiverID, out)
 	}
 }
 
 func (c *Client) WritePump() {
 	for msg := range c.Send {
-		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			break
-		}
+		_ = c.Conn.WriteMessage(websocket.TextMessage, msg)
 	}
 }

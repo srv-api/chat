@@ -1,19 +1,16 @@
-// ws/hub.go
 package ws
 
 type Hub struct {
-	Clients    map[int]*Client
+	Clients    map[int][]*Client
 	Register   chan *Client
 	Unregister chan *Client
-	Broadcast  chan []byte
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Clients:    make(map[int]*Client),
+		Clients:    make(map[int][]*Client),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
-		Broadcast:  make(chan []byte),
 	}
 }
 
@@ -21,16 +18,27 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			h.Clients[client.ID] = client
+			h.Clients[client.ID] = append(h.Clients[client.ID], client)
 
 		case client := <-h.Unregister:
-			delete(h.Clients, client.ID)
-			close(client.Send)
-
-		case message := <-h.Broadcast:
-			for _, client := range h.Clients {
-				client.Send <- message
+			clients := h.Clients[client.ID]
+			for i, c := range clients {
+				if c == client {
+					h.Clients[client.ID] = append(clients[:i], clients[i+1:]...)
+					break
+				}
 			}
 		}
+	}
+}
+
+func (h *Hub) SendToUser(userID int, message []byte) {
+	clients, ok := h.Clients[userID]
+	if !ok {
+		return
+	}
+
+	for _, c := range clients {
+		c.Send <- message
 	}
 }

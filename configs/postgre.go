@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"srv-api/chat/entity"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -52,8 +53,7 @@ func InitDB() *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// Migrate the schema
-	db.AutoMigrate()
-
+	db.AutoMigrate(&entity.Chat{})
 	return db
 }
 

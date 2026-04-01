@@ -1,16 +1,34 @@
-// handler/websocket_handler.go
-package handler
+package roomchat
 
 import (
+	"net/http"
 	"strconv"
-	"your_project/ws"
 
+	"srv-api/chat/services/roomchat"
+	"srv-api/chat/ws"
+
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
 
+type domainHandler struct {
+	hub     *ws.Hub
+	service roomchat.ChatService
+}
+
+func NewRoomChatHandler(hub *ws.Hub, service roomchat.ChatService) DomainHandler {
+	return &domainHandler{
+		hub:     hub,
+		service: service,
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
 func (h *domainHandler) HandleWebSocket(c echo.Context) error {
-	userIDStr := c.QueryParam("user_id")
-	userID, _ := strconv.Atoi(userIDStr)
+	userID, _ := strconv.Atoi(c.QueryParam("user_id"))
 
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
@@ -23,10 +41,10 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 		Send: make(chan []byte),
 	}
 
-	h.Hub.Register <- client
+	h.hub.Register <- client
 
 	go client.WritePump()
-	go client.ReadPump(h.Hub)
+	go client.ReadPump(h.hub, h.service)
 
 	return nil
 }

@@ -1,11 +1,8 @@
 package roomchat
 
-import "your_project/ws"
+import "srv-api/chat/dto"
 
-type ChatService struct {
-	Hub *ws.Hub
-}
-
-func NewChatService(hub *ws.Hub) *ChatService {
-	return &ChatService{Hub: hub}
+type ChatService interface {
+	ProcessMessage(msg []byte) (*dto.ChatMessage, error)
+	SaveMessage(data dto.ChatMessage) error
 }
