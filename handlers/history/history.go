@@ -15,8 +15,7 @@ func (h *domainHandler) GetChatHistory(c echo.Context) error {
 		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
 	}
 
-	userID, _ := strconv.Atoi(c.QueryParam(userid))
-	receiverID, _ := strconv.Atoi(c.QueryParam("receiver_id"))
+	receiverID := c.QueryParam("receiver_id")
 
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
@@ -28,7 +27,7 @@ func (h *domainHandler) GetChatHistory(c echo.Context) error {
 		limit = 20
 	}
 
-	data, err := h.serviceHistory.GetHistory(userID, receiverID, page, limit)
+	data, err := h.serviceHistory.GetHistory(userid, receiverID, page, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
