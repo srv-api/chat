@@ -28,7 +28,11 @@ func New() *echo.Echo {
 	h := h_chat.NewRoomChatHandler(hub, service) // pakai variabel h
 
 	e.GET("/ws", h.HandleWebSocket)
-	e.GET("/chat/history", h.GetChatHistory)
+
+	history := e.Group("/chat")
+	{
+		history.GET("/history", h.GetChatHistory)
+	}
 
 	return e
 }
