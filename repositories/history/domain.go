@@ -7,7 +7,7 @@ import (
 )
 
 type HistoryRepository interface {
-	GetChatHistory(userID, receiverID, limit, offset int) ([]entity.Chat, error)
+	GetChatHistory(userID, receiverID string, limit, offset int) ([]entity.Chat, error)
 }
 
 type historyRepository struct {
