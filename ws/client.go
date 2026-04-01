@@ -9,7 +9,7 @@ import (
 )
 
 type Client struct {
-	ID   int
+	ID   string
 	Conn *websocket.Conn
 	Send chan []byte
 }

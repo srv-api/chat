@@ -1,14 +1,14 @@
 package ws
 
 type Hub struct {
-	Clients    map[int][]*Client
+	Clients    map[string][]*Client
 	Register   chan *Client
 	Unregister chan *Client
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Clients:    make(map[int][]*Client),
+		Clients:    make(map[string][]*Client),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 	}
@@ -32,7 +32,7 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) SendToUser(userID int, message []byte) {
+func (h *Hub) SendToUser(userID string, message []byte) {
 	clients, ok := h.Clients[userID]
 	if !ok {
 		return

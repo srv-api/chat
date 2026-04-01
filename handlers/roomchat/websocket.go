@@ -36,7 +36,7 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 	}
 
 	client := &ws.Client{
-		ID:   userID,
+		ID:   strconv.Itoa(userID),
 		Conn: conn,
 		Send: make(chan []byte),
 	}

@@ -5,6 +5,8 @@ import (
 	"srv-api/chat/dto"
 	"srv-api/chat/entity"
 	repository "srv-api/chat/repositories/roomchat"
+
+	util "github.com/srv-api/util/s"
 )
 
 type chatService struct {
@@ -23,6 +25,7 @@ func (s *chatService) ProcessMessage(msg []byte) (*dto.ChatMessage, error) {
 
 func (s *chatService) SaveMessage(data dto.ChatMessage) error {
 	chat := entity.Chat{
+		ID:         util.GenerateRandomString(),
 		SenderID:   data.SenderID,
 		ReceiverID: data.ReceiverID,
 		Message:    data.Message,
