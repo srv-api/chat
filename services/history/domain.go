@@ -8,7 +8,7 @@ import (
 )
 
 type HistoryService interface {
-	GetHistory(userID, receiverID, page, limit int) ([]entity.Chat, error)
+	GetHistory(userID, receiverID string, page, limit int) ([]entity.Chat, error)
 }
 
 type historyService struct {
