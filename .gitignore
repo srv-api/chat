@@ -1,0 +1,8 @@
+configs/firebase-service-account.json
+.env-prod
+.env
+main.go
+main-prod.go
+certs/
+docker-compose-prod.yml
+docker-compose.yml
