@@ -36,7 +36,7 @@ func New() *echo.Echo {
 
 	e.GET("/ws", h.HandleWebSocket)
 
-	history := e.Group("/chat")
+	history := e.Group("/c")
 	{
 		history.GET("/history", historyH.GetChatHistory)
 	}
