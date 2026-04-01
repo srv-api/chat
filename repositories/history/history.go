@@ -2,7 +2,7 @@ package history
 
 import "srv-api/chat/entity"
 
-func (r *historyRepository) GetChatHistory(userID, receiverID, limit, offset int) ([]entity.Chat, error) {
+func (r *historyRepository) GetChatHistory(userID, receiverID string, limit, offset int) ([]entity.Chat, error) {
 	var chats []entity.Chat
 
 	err := r.DB.
