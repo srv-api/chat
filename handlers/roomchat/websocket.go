@@ -2,7 +2,6 @@ package roomchat
 
 import (
 	"net/http"
-	"strconv"
 
 	"srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
@@ -28,7 +27,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *domainHandler) HandleWebSocket(c echo.Context) error {
-	userID, _ := strconv.Atoi(c.QueryParam("user_id"))
+	userID := c.QueryParam("user_id")
 
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
@@ -36,7 +35,7 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 	}
 
 	client := &ws.Client{
-		ID:   strconv.Itoa(userID),
+		ID:   userID,
 		Conn: conn,
 		Send: make(chan []byte),
 	}
