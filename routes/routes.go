@@ -2,9 +2,10 @@ package routes
 
 import (
 	"srv-api/chat/configs"
-	h_chat "srv-api/chat/handlers/roomchat" // ✅ TAMBAH INI
+	h_chat "srv-api/chat/handlers/roomchat"
 	r_chat "srv-api/chat/repositories/roomchat"
 	s_chat "srv-api/chat/services/roomchat"
+
 	"srv-api/chat/ws"
 
 	"github.com/labstack/echo/v4"
@@ -27,6 +28,7 @@ func New() *echo.Echo {
 	h := h_chat.NewRoomChatHandler(hub, service) // pakai variabel h
 
 	e.GET("/ws", h.HandleWebSocket)
+	e.GET("/chat/history", h.GetChatHistory)
 
 	return e
 }

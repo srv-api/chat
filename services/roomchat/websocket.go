@@ -30,3 +30,8 @@ func (s *chatService) SaveMessage(data dto.ChatMessage) error {
 
 	return s.repo.Save(&chat)
 }
+
+func (s *chatService) GetHistory(userID, receiverID, page, limit int) ([]entity.Chat, error) {
+	offset := (page - 1) * limit
+	return s.repo.GetChatHistory(userID, receiverID, limit, offset)
+}
