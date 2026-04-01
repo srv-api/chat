@@ -18,7 +18,7 @@ func (r *chatRepository) Save(chat *entity.Chat) error {
 	return r.db.Create(chat).Error
 }
 
-func (r *chatRepository) GetChatHistory(userID, receiverID, limit, offset int) ([]entity.Chat, error) {
+func (r *chatRepository) GetChatHistory(userID, receiverID string, limit, offset int) ([]entity.Chat, error) {
 	var chats []entity.Chat
 
 	err := r.db.
