@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"srv-api/chat/configs"
 	h_chat "srv-api/chat/handlers/roomchat"
 	r_chat "srv-api/chat/repositories/roomchat"
@@ -40,6 +41,14 @@ func New() *echo.Echo {
 	{
 		history.GET("/history", historyH.GetChatHistory)
 	}
+
+		// DEBUG: Print semua route yang terdaftar
+	fmt.Println("\n========== REGISTERED ROUTES ==========")
+	for _, route := range e.Routes() {
+		fmt.Printf("Method: %-6s Path: %s\n", route.Method, route.Path)
+	}
+	fmt.Println("=======================================\n")
+
 
 	return e
 }
