@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"srv-api/chat/configs"
 	h_chat "srv-api/chat/handlers/roomchat"
 	r_chat "srv-api/chat/repositories/roomchat"
@@ -13,11 +12,14 @@ import (
 
 	"srv-api/chat/ws"
 
+	"github.com/srv-api/middlewares/middlewares"
+
 	"github.com/labstack/echo/v4"
 )
 
 var (
-	DB = configs.InitDB()
+	DB  = configs.InitDB()
+	JWT = middlewares.NewJWTService()
 )
 
 func New() *echo.Echo {
@@ -32,23 +34,15 @@ func New() *echo.Echo {
 	h := h_chat.NewRoomChatHandler(hub, service)
 
 	historyR := r_history.NewHistoryRepository(DB)
-	historyS := s_history.NewHistoryService(historyR)
+	historyS := s_history.NewHistoryService(historyR, JWT)
 	historyH := h_history.NewHistoryHandler(historyS)
 
 	e.GET("/ws", h.HandleWebSocket)
 
-	history := e.Group("/c")
+	history := e.Group("/c", middlewares.AuthorizeJWT(JWT))
 	{
 		history.GET("/history", historyH.GetChatHistory)
 	}
-
-		// DEBUG: Print semua route yang terdaftar
-	fmt.Println("\n========== REGISTERED ROUTES ==========")
-	for _, route := range e.Routes() {
-		fmt.Printf("Method: %-6s Path: %s\n", route.Method, route.Path)
-	}
-	fmt.Println("=======================================\n")
-
 
 	return e
 }

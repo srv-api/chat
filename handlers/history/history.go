@@ -5,10 +5,17 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	res "github.com/srv-api/util/s/response"
 )
 
 func (h *domainHandler) GetChatHistory(c echo.Context) error {
-	userID, _ := strconv.Atoi(c.QueryParam("user_id"))
+
+	userid, ok := c.Get("UserId").(string)
+	if !ok {
+		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
+	}
+
+	userID, _ := strconv.Atoi(c.QueryParam(userid))
 	receiverID, _ := strconv.Atoi(c.QueryParam("receiver_id"))
 
 	page, _ := strconv.Atoi(c.QueryParam("page"))

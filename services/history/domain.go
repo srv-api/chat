@@ -3,6 +3,8 @@ package history
 import (
 	"srv-api/chat/entity"
 	r "srv-api/chat/repositories/history"
+
+	m "github.com/srv-api/middlewares/middlewares"
 )
 
 type HistoryService interface {
@@ -11,8 +13,12 @@ type HistoryService interface {
 
 type historyService struct {
 	repo r.HistoryRepository
+	jwt  m.JWTService
 }
 
-func NewHistoryService(repo r.HistoryRepository) HistoryService {
-	return &historyService{repo: repo}
+func NewHistoryService(repo r.HistoryRepository, jwtS m.JWTService) HistoryService {
+	return &historyService{
+		repo: repo,
+		jwt:  jwtS,
+	}
 }
