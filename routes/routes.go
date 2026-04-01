@@ -6,6 +6,10 @@ import (
 	r_chat "srv-api/chat/repositories/roomchat"
 	s_chat "srv-api/chat/services/roomchat"
 
+	h_history "srv-api/chat/handlers/history"
+	r_history "srv-api/chat/repositories/history"
+	s_history "srv-api/chat/services/history"
+
 	"srv-api/chat/ws"
 
 	"github.com/labstack/echo/v4"
@@ -24,14 +28,17 @@ func New() *echo.Echo {
 
 	repo := r_chat.NewChatRepository(DB)
 	service := s_chat.NewChatService(repo)
+	h := h_chat.NewRoomChatHandler(hub, service)
 
-	h := h_chat.NewRoomChatHandler(hub, service) // pakai variabel h
+	historyR := r_history.NewHistoryRepository(DB)
+	historyS := s_history.NewHistoryService(historyR)
+	historyH := h_history.NewHistoryHandler(historyS)
 
 	e.GET("/ws", h.HandleWebSocket)
 
 	history := e.Group("/chat")
 	{
-		history.GET("/history", h.GetChatHistory)
+		history.GET("/history", historyH.GetChatHistory)
 	}
 
 	return e
