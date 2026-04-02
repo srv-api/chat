@@ -10,7 +10,7 @@ func (r *historyRepository) GetChatHistory(userID, receiverID string, limit, off
 			"(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
 			userID, receiverID, receiverID, userID,
 		).
-		Order("created_at DESC").
+		Order("created_at ASC").
 		Limit(limit).
 		Offset(offset).
 		Find(&chats).Error
