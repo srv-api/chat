@@ -17,7 +17,7 @@ func NewChatRepository(db *gorm.DB) ChatRepository {
 func (r *chatRepository) Save(chat *entity.Chat) error {
 	return r.db.Create(chat).Error
 }
-
+//
 func (r *chatRepository) GetChatHistory(userID, receiverID string, limit, offset int) ([]entity.Chat, error) {
 	var chats []entity.Chat
 
