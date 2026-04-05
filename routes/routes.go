@@ -1,48 +1,43 @@
+// routes/routes.go
 package routes
 
 import (
-	"srv-api/chat/configs"
-	h_chat "srv-api/chat/handlers/roomchat"
-	r_chat "srv-api/chat/repositories/roomchat"
-	s_chat "srv-api/chat/services/roomchat"
-
-	h_history "srv-api/chat/handlers/history"
-	r_history "srv-api/chat/repositories/history"
-	s_history "srv-api/chat/services/history"
-
+	h "srv-api/chat/handlers/roomchat"
+	s "srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
 
-	"github.com/srv-api/middlewares/middlewares"
-
 	"github.com/labstack/echo/v4"
-)
-
-var (
-	DB  = configs.InitDB()
-	JWT = middlewares.NewJWTService()
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func New() *echo.Echo {
-
 	e := echo.New()
 
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
+
+	// Initialize WebSocket Hub
 	hub := ws.NewHub()
 	go hub.Run()
 
-	repo := r_chat.NewChatRepository(DB)
-	service := s_chat.NewChatService(repo)
-	h := h_chat.NewRoomChatHandler(hub, service)
+	// Initialize Service (tanpa repository)
+	service := s.NewChatService()
 
-	historyR := r_history.NewHistoryRepository(DB)
-	historyS := s_history.NewHistoryService(historyR, JWT)
-	historyH := h_history.NewHistoryHandler(historyS)
+	// Initialize Handler
+	handler := h.NewRoomChatHandler(hub, service)
 
-	e.GET("/ws", h.HandleWebSocket)
+	// Routes - Hanya WebSocket
+	e.GET("/ws", handler.HandleWebSocket)
 
-	history := e.Group("/c", middlewares.AuthorizeJWT(JWT))
-	{
-		history.GET("/history", historyH.GetChatHistory)
-	}
+	// Health check (opsional)
+	e.GET("/health", func(c echo.Context) error {
+		return c.JSON(200, map[string]interface{}{
+			"status":  "ok",
+			"service": "chat-websocket",
+		})
+	})
 
 	return e
 }

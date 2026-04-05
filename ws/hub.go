@@ -1,16 +1,24 @@
 package ws
 
+import (
+	"log"
+	"sync"
+)
+
 type Hub struct {
-	Clients    map[string][]*Client
+	Clients    map[string]*Client
 	Register   chan *Client
 	Unregister chan *Client
+	Broadcast  chan []byte
+	mu         sync.RWMutex
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Clients:    make(map[string][]*Client),
+		Clients:    make(map[string]*Client),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
+		Broadcast:  make(chan []byte),
 	}
 }
 
@@ -18,27 +26,39 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			h.Clients[client.ID] = append(h.Clients[client.ID], client)
+			h.mu.Lock()
+			h.Clients[client.ID] = client
+			h.mu.Unlock()
+			log.Printf("✅ Client %s connected", client.ID)
 
 		case client := <-h.Unregister:
-			clients := h.Clients[client.ID]
-			for i, c := range clients {
-				if c == client {
-					h.Clients[client.ID] = append(clients[:i], clients[i+1:]...)
-					break
+			h.mu.Lock()
+			if _, ok := h.Clients[client.ID]; ok {
+				delete(h.Clients, client.ID)
+				close(client.Send)
+			}
+			h.mu.Unlock()
+			log.Printf("❌ Client %s disconnected", client.ID)
+
+		case message := <-h.Broadcast:
+			h.mu.RLock()
+			for _, client := range h.Clients {
+				select {
+				case client.Send <- message:
+				default:
+					close(client.Send)
+					delete(h.Clients, client.ID)
 				}
 			}
+			h.mu.RUnlock()
 		}
 	}
 }
 
-func (h *Hub) SendToUser(userID string, message []byte) {
-	clients, ok := h.Clients[userID]
-	if !ok {
-		return
-	}
-
-	for _, c := range clients {
-		c.Send <- message
-	}
+// GetClient returns client by ID
+func (h *Hub) GetClient(userID string) (*Client, bool) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	client, exists := h.Clients[userID]
+	return client, exists
 }

@@ -1,9 +1,9 @@
-// ws/client.go
+// websocket/client.go
 package ws
 
 import (
 	"encoding/json"
-	"srv-api/chat/services/roomchat"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,34 +12,83 @@ type Client struct {
 	ID   string
 	Conn *websocket.Conn
 	Send chan []byte
+	Hub  *Hub
 }
 
-func (c *Client) ReadPump(hub *Hub, service roomchat.ChatService) {
+// ReadPump - menggunakan MessageProcessor interface
+func (c *Client) ReadPump(processor MessageProcessor) {
 	defer func() {
-		hub.Unregister <- c
+		c.Hub.Unregister <- c
 		c.Conn.Close()
 	}()
 
 	for {
-		_, msg, err := c.Conn.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket error: %v", err)
+			}
 			break
 		}
 
-		data, err := service.ProcessMessage(msg)
+		// Process message via processor
+		msgMap, err := processor.ProcessMessage(message)
 		if err != nil {
+			log.Printf("Process error: %v", err)
 			continue
 		}
 
-		_ = service.SaveMessage(*data)
+		// Ignore typing indicator
+		if msgType, ok := msgMap["type"]; ok && msgType == "typing" {
+			continue
+		}
 
-		out, _ := json.Marshal(data)
-		hub.SendToUser(data.ReceiverID, out)
+		// Get receiver ID
+		receiverID, ok := msgMap["receiver_id"].(string)
+		if !ok {
+			log.Printf("No receiver_id in message")
+			continue
+		}
+
+		log.Printf("📨 Message from %v to %s", msgMap["sender_id"], receiverID)
+
+		// Cari receiver di hub
+		c.Hub.mu.RLock()
+		receiver, exists := c.Hub.Clients[receiverID]
+		c.Hub.mu.RUnlock()
+
+		if exists {
+			// Forward message ke receiver
+			data, _ := json.Marshal(msgMap)
+			select {
+			case receiver.Send <- data:
+				log.Printf("✅ Message forwarded to %s", receiverID)
+			default:
+				log.Printf("⚠️ Receiver %s channel full", receiverID)
+			}
+		} else {
+			log.Printf("⚠️ Receiver %s offline", receiverID)
+			// Kirim error balik ke sender
+			errorMsg := map[string]interface{}{
+				"type":    "error",
+				"message": "receiver offline",
+				"id":      msgMap["id"],
+			}
+			errorData, _ := json.Marshal(errorMsg)
+			c.Send <- errorData
+		}
 	}
 }
 
+// WritePump mengirim pesan ke client
 func (c *Client) WritePump() {
-	for msg := range c.Send {
-		_ = c.Conn.WriteMessage(websocket.TextMessage, msg)
+	defer func() {
+		c.Conn.Close()
+	}()
+
+	for message := range c.Send {
+		if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			break
+		}
 	}
 }

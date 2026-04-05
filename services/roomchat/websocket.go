@@ -1,35 +1,40 @@
+// services/roomchat/service.go
 package roomchat
 
 import (
 	"encoding/json"
-	"srv-api/chat/dto"
-	"srv-api/chat/entity"
-	repository "srv-api/chat/repositories/roomchat"
+	"time"
 
-	util "github.com/srv-api/util/s"
+	"github.com/google/uuid"
 )
 
-type chatService struct {
-	repo repository.ChatRepository
+type chatService struct{}
+
+func NewChatService() ChatService {
+	return &chatService{}
 }
 
-func NewChatService(repo repository.ChatRepository) ChatService {
-	return &chatService{repo: repo}
-}
-
-func (s *chatService) ProcessMessage(msg []byte) (*dto.ChatMessage, error) {
-	var data dto.ChatMessage
+func (s *chatService) ProcessMessage(msg []byte) (map[string]interface{}, error) {
+	var data map[string]interface{}
 	err := json.Unmarshal(msg, &data)
-	return &data, err
-}
-
-func (s *chatService) SaveMessage(data dto.ChatMessage) error {
-	chat := entity.Chat{
-		ID:         util.GenerateRandomString(),
-		SenderID:   data.SenderID,
-		ReceiverID: data.ReceiverID,
-		Message:    data.Message,
+	if err != nil {
+		return nil, err
 	}
 
-	return s.repo.Save(&chat)
+	// Set ID jika tidak ada
+	if _, ok := data["id"]; !ok || data["id"] == "" {
+		data["id"] = uuid.New().String()
+	}
+
+	// Set timestamp jika tidak ada
+	if _, ok := data["created_at"]; !ok || data["created_at"] == "" {
+		data["created_at"] = time.Now().Format(time.RFC3339)
+	}
+
+	// Set default type
+	if _, ok := data["type"]; !ok || data["type"] == "" {
+		data["type"] = "chat"
+	}
+
+	return data, nil
 }
