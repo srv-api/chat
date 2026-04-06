@@ -6,3 +6,4 @@ main-prod.go
 certs/
 docker-compose-prod.yml
 docker-compose.yml
+cashpay-2ac49-firebase-adminsdk-fbsvc-a068e30211.json
