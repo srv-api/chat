@@ -2,6 +2,7 @@ package routes
 
 import (
 	"log"
+	"os"
 	"srv-api/chat/configs"
 	"srv-api/chat/handlers/roomchat"
 	repNotification "srv-api/chat/repositories/notification"
@@ -23,9 +24,10 @@ func New() *echo.Echo {
 
 	// Database
 	db := configs.InitDB() // ✅ pakai configs
+	credFile := os.Getenv("CredFile")
 
 	// FCM Service (optional - jika file tidak ada, jalankan tanpa FCM)
-	fcmService, err := notification.NewFCMService("firebase-credentials.json")
+	fcmService, err := notification.NewFCMService(credFile)
 	if err != nil {
 		log.Println("⚠️ FCM Service not initialized:", err)
 		log.Println("   Push notifications will not work")
