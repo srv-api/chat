@@ -1,3 +1,4 @@
+// routes/routes.go
 package routes
 
 import (
@@ -23,17 +24,28 @@ func New() *echo.Echo {
 	e.Use(middleware.CORS())
 
 	// Database
-	db := configs.InitDB() // ✅ pakai configs
+	db := configs.InitDB()
+
+	// Ambil credentials file dari environment variable
 	credFile := os.Getenv("CredFile")
 
-	// FCM Service (optional - jika file tidak ada, jalankan tanpa FCM)
-	fcmService, err := notification.NewFCMService(credFile)
-	if err != nil {
-		log.Println("⚠️ FCM Service not initialized:", err)
-		log.Println("   Push notifications will not work")
-		fcmService = nil
+	// Cek apakah file credentials ada
+	var fcmService *notification.FCMService
+	if credFile != "" {
+		// Cek apakah file ada
+		if _, err := os.Stat(credFile); err == nil {
+			service, err := notification.NewFCMService(credFile)
+			if err != nil {
+				log.Println("⚠️ FCM Service not initialized:", err)
+			} else {
+				fcmService = service
+				log.Println("✅ FCM Service initialized")
+			}
+		} else {
+			log.Println("⚠️ Firebase credentials file not found:", credFile)
+		}
 	} else {
-		log.Println("✅ FCM Service initialized")
+		log.Println("⚠️ CredFile environment variable not set")
 	}
 
 	// Repository
@@ -55,14 +67,10 @@ func New() *echo.Echo {
 
 	// Health check
 	e.GET("/health", func(c echo.Context) error {
-		fcmStatus := false
-		if fcmService != nil {
-			fcmStatus = true
-		}
 		return c.JSON(200, map[string]interface{}{
 			"status":  "ok",
 			"service": "chat-websocket",
-			"fcm":     fcmStatus,
+			"fcm":     fcmService != nil,
 		})
 	})
 

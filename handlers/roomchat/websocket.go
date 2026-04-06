@@ -4,8 +4,7 @@ import (
 	"net/http"
 	"srv-api/chat/dto"
 	repoNotif "srv-api/chat/repositories/notification" // Alias
-	"srv-api/chat/services/notification"
-	serviceNotif "srv-api/chat/services/notification" // Alias
+	"srv-api/chat/services/notification"               // Alias
 	"srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
 
@@ -16,15 +15,15 @@ import (
 type domainHandler struct {
 	hub        *ws.Hub
 	service    roomchat.ChatService
-	fcmService *serviceNotif.FCMService
-	fcmRepo    repoNotif.FCMRepository
+	fcmService *notification.FCMService // ✅ langsung pakai notification
+	fcmRepo    repoNotif.FCMRepository  // ✅ pakai repoNotif
 }
 
 func NewRoomChatHandler(
 	hub *ws.Hub,
 	service roomchat.ChatService,
 	fcmService *notification.FCMService,
-	fcmRepo notification.FCMRepository,
+	fcmRepo repoNotif.FCMRepository,
 ) DomainHandler {
 	return &domainHandler{
 		hub:        hub,
