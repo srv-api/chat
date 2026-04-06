@@ -23,7 +23,7 @@ type Config struct {
 func InitDB() *gorm.DB {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Warning: No .env file found, using environment variables")
 	}
 
 	dbUser := os.Getenv("DB_USER")
@@ -32,36 +32,37 @@ func InitDB() *gorm.DB {
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
+	// Validate required env vars
+	if dbUser == "" || dbHost == "" || dbPort == "" || dbName == "" {
+		log.Fatal("Missing required database environment variables")
+	}
+
 	// Create the connection string for PostgreSQL
-	dbURI := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", dbHost, dbPort, dbUser, dbName, dbPassword)
+	dbURI := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbName, dbPassword)
 
 	// Open connection to the database
 	db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect to database:", err)
 	}
 
 	sqlDB, _ := db.DB()
 
-	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	// Connection pool settings
 	sqlDB.SetMaxIdleConns(10)
-
-	// SetMaxOpenConns sets the maximum number of open connections to the database.
 	sqlDB.SetMaxOpenConns(100)
-
-	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	// Migrate the schema
-	db.AutoMigrate(&entity.Chat{})
+	// ✅ Migrate ALL entities (termasuk FCMToken)
+	if err := db.AutoMigrate(&entity.Chat{}, &entity.FCMToken{}); err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
+
+	log.Println("✅ Database connected and migrated")
 	return db
 }
 
-func InitialMigration(db *gorm.DB) {
-	// Get the underlying sql.DB instance from the gorm.DB instance.
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbSQL.Close() // Close the database connection
+func GetDB() *gorm.DB {
+	return InitDB()
 }

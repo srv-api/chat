@@ -2,7 +2,10 @@ package roomchat
 
 import (
 	"net/http"
-
+	"srv-api/chat/dto"
+	repoNotif "srv-api/chat/repositories/notification" // Alias
+	"srv-api/chat/services/notification"
+	serviceNotif "srv-api/chat/services/notification" // Alias
 	"srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
 
@@ -11,14 +14,23 @@ import (
 )
 
 type domainHandler struct {
-	hub     *ws.Hub
-	service roomchat.ChatService
+	hub        *ws.Hub
+	service    roomchat.ChatService
+	fcmService *serviceNotif.FCMService
+	fcmRepo    repoNotif.FCMRepository
 }
 
-func NewRoomChatHandler(hub *ws.Hub, service roomchat.ChatService) DomainHandler {
+func NewRoomChatHandler(
+	hub *ws.Hub,
+	service roomchat.ChatService,
+	fcmService *notification.FCMService,
+	fcmRepo notification.FCMRepository,
+) DomainHandler {
 	return &domainHandler{
-		hub:     hub,
-		service: service,
+		hub:        hub,
+		service:    service,
+		fcmService: fcmService,
+		fcmRepo:    fcmRepo,
 	}
 }
 
@@ -53,7 +65,45 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 	h.hub.Register <- client
 
 	go client.WritePump()
-	go client.ReadPump(h.service) // ✅ Sekarang sesuai dengan signature
+	go client.ReadPump(h.service, h.fcmService, h.fcmRepo)
 
 	return nil
+}
+
+func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
+	userID := c.QueryParam("user_id")
+	if userID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "user_id is required",
+		})
+	}
+
+	var req dto.FCMTokenRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	if req.FCMToken == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "fcm_token is required",
+		})
+	}
+
+	if req.DeviceType == "" {
+		req.DeviceType = "android"
+	}
+
+	err := h.fcmRepo.SaveOrUpdateToken(userID, req.FCMToken, req.DeviceType)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to save token",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "FCM token saved",
+	})
 }
