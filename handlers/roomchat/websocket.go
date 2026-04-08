@@ -8,6 +8,8 @@ import (
 	"srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
 
+	res "github.com/srv-api/util/s/response"
+
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
@@ -40,7 +42,12 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *domainHandler) HandleWebSocket(c echo.Context) error {
-	userID := c.QueryParam("user_id")
+	useridToken, ok := c.Get("UserId").(string)
+	if !ok {
+		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
+	}
+
+	userID := c.QueryParam(useridToken)
 	if userID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "user_id is required",
@@ -70,7 +77,12 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 }
 
 func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
-	userID := c.QueryParam("user_id")
+	useridToken, ok := c.Get("UserId").(string)
+	if !ok {
+		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
+	}
+
+	userID := c.QueryParam(useridToken)
 	if userID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "user_id is required",
