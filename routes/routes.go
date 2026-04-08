@@ -13,6 +13,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/srv-api/middlewares/middlewares"
 )
 
 func New() *echo.Echo {
@@ -22,6 +23,7 @@ func New() *echo.Echo {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	JWT := middlewares.NewJWTService()
 
 	// Database
 	db := configs.InitDB()
@@ -64,6 +66,11 @@ func New() *echo.Echo {
 	// Routes
 	e.GET("/ws", handler.HandleWebSocket)
 	e.POST("/users/fcm-token", handler.UpdateFCMToken)
+
+	usermerchant := e.Group("/users", middlewares.AuthorizeJWT(JWT))
+	{
+		usermerchant.POST("/fcm-token", handler.UpdateFCMToken)
+	}
 
 	// Health check
 	e.GET("/health", func(c echo.Context) error {
