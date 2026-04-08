@@ -50,6 +50,8 @@ func (h *domainHandler) HandleWebSocket(c echo.Context) error {
 }
 
 func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
+	var req dto.FCMTokenRequest
+
 	useridToken, ok := c.Get("UserId").(string)
 	if !ok {
 		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
@@ -61,8 +63,7 @@ func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
 			"error": "user_id is required",
 		})
 	}
-
-	var req dto.FCMTokenRequest
+	req.UserID = userID
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
