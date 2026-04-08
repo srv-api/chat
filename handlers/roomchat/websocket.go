@@ -2,10 +2,9 @@ package roomchat
 
 import (
 	"net/http"
-	"srv-api/chat/dto"
-	repoNotif "srv-api/chat/repositories/notification" // Alias
-	"srv-api/chat/services/notification"               // Alias
-	"srv-api/chat/services/roomchat"
+	"srv-api/chat/dto" // Alias
+
+	// Alias
 	"srv-api/chat/ws"
 
 	res "github.com/srv-api/util/s/response"
@@ -13,27 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
-
-type domainHandler struct {
-	hub        *ws.Hub
-	service    roomchat.ChatService
-	fcmService *notification.FCMService // ✅ langsung pakai notification
-	fcmRepo    repoNotif.FCMRepository  // ✅ pakai repoNotif
-}
-
-func NewRoomChatHandler(
-	hub *ws.Hub,
-	service roomchat.ChatService,
-	fcmService *notification.FCMService,
-	fcmRepo repoNotif.FCMRepository,
-) DomainHandler {
-	return &domainHandler{
-		hub:        hub,
-		service:    service,
-		fcmService: fcmService,
-		fcmRepo:    fcmRepo,
-	}
-}
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },

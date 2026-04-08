@@ -7,7 +7,7 @@ import (
 	"srv-api/chat/configs"
 	"srv-api/chat/handlers/roomchat"
 	repNotification "srv-api/chat/repositories/notification"
-	"srv-api/chat/services/notification"
+	serNotif "srv-api/chat/services/notification"
 	s "srv-api/chat/services/roomchat"
 	"srv-api/chat/ws"
 
@@ -27,16 +27,17 @@ func New() *echo.Echo {
 
 	// Database
 	db := configs.InitDB()
+	fcmRepo := repNotification.NewFCMRepository(db)
 
 	// Ambil credentials file dari environment variable
 	credFile := os.Getenv("CredFile")
 
 	// Cek apakah file credentials ada
-	var fcmService *notification.FCMService
+	var fcmService serNotif.FcmService
 	if credFile != "" {
 		// Cek apakah file ada
 		if _, err := os.Stat(credFile); err == nil {
-			service, err := notification.NewFCMService(credFile)
+			service, err := serNotif.NewFCMService(fcmRepo, credFile, JWT)
 			if err != nil {
 				log.Println("⚠️ FCM Service not initialized:", err)
 			} else {
@@ -51,7 +52,6 @@ func New() *echo.Echo {
 	}
 
 	// Repository
-	fcmRepo := repNotification.NewFCMRepository(db)
 
 	// WebSocket Hub
 	hub := ws.NewHub()
@@ -68,8 +68,6 @@ func New() *echo.Echo {
 
 	usermerchant := e.Group("/users", middlewares.AuthorizeJWT(JWT))
 	{
-		e.GET("/ws", handler.HandleWebSocket)
-
 		usermerchant.POST("/fcm-token", handler.UpdateFCMToken)
 	}
 

@@ -4,32 +4,11 @@ import (
 	"context"
 	"log"
 
-	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
-	"google.golang.org/api/option"
 )
 
-type FCMService struct {
-	client *messaging.Client
-}
-
-func NewFCMService(credentialsPath string) (*FCMService, error) {
-	opt := option.WithCredentialsFile(credentialsPath)
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := app.Messaging(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return &FCMService{client: client}, nil
-}
-
 // SendToDevice - kirim notifikasi ke satu device
-func (f *FCMService) SendToDevice(userFCMToken string, data map[string]interface{}) error {
+func (f *fcmService) SendToDevice(userFCMToken string, data map[string]interface{}) error {
 	if userFCMToken == "" {
 		log.Println("No FCM token for user")
 		return nil
@@ -82,4 +61,16 @@ func (f *FCMService) SendToDevice(userFCMToken string, data map[string]interface
 
 	log.Printf("✅ Push notification sent to %s", userFCMToken)
 	return nil
+}
+
+func (f *fcmService) SaveOrUpdateToken(userID, token, deviceType string) error {
+	return f.repo.SaveOrUpdateToken(userID, token, deviceType)
+}
+
+func (f *fcmService) GetTokenByUserID(userID string) (string, error) {
+	return f.repo.GetTokenByUserID(userID)
+}
+
+func (f *fcmService) DeleteToken(userID string) error {
+	return f.repo.DeleteToken(userID)
 }
