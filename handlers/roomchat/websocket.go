@@ -57,13 +57,6 @@ func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
 		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
 	}
 
-	userID := c.QueryParam(useridToken)
-	if userID == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "user_id is required",
-		})
-	}
-	req.UserID = userID
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
@@ -80,7 +73,7 @@ func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
 		req.DeviceType = "android"
 	}
 
-	err := h.fcmRepo.SaveOrUpdateToken(req.UserID, req.FCMToken, req.DeviceType)
+	err := h.fcmRepo.SaveOrUpdateToken(useridToken, req.FCMToken, req.DeviceType)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "failed to save token",
