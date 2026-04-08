@@ -42,12 +42,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *domainHandler) HandleWebSocket(c echo.Context) error {
-	useridToken, ok := c.Get("UserId").(string)
-	if !ok {
-		return res.ErrorBuilder(&res.ErrorConstant.InternalServerError, nil).Send(c)
-	}
-
-	userID := c.QueryParam(useridToken)
+	userID := c.QueryParam("user_id")
 	if userID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "user_id is required",

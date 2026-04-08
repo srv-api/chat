@@ -64,6 +64,7 @@ func New() *echo.Echo {
 	handler := roomchat.NewRoomChatHandler(hub, chatService, fcmService, fcmRepo)
 
 	// Routes
+	e.GET("/ws", handler.HandleWebSocket)
 
 	usermerchant := e.Group("/users", middlewares.AuthorizeJWT(JWT))
 	{
