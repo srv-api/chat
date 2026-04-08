@@ -80,7 +80,7 @@ func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
 		req.DeviceType = "android"
 	}
 
-	err := h.fcmRepo.SaveOrUpdateToken(userID, req.FCMToken, req.DeviceType)
+	err := h.fcmRepo.SaveOrUpdateToken(req.UserID, req.FCMToken, req.DeviceType)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "failed to save token",
