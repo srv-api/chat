@@ -17,6 +17,7 @@ func (f *fcmService) SendToDevice(userFCMToken string, data map[string]interface
 	title, _ := data["title"].(string)
 	body, _ := data["body"].(string)
 	senderID, _ := data["sender_id"].(string)
+	receiverID, _ := data["receiver_id"].(string)
 	senderName, _ := data["sender_name"].(string)
 	msgType, _ := data["type"].(string)
 
@@ -28,6 +29,7 @@ func (f *fcmService) SendToDevice(userFCMToken string, data map[string]interface
 		},
 		Data: map[string]string{
 			"sender_id":         senderID,
+			"receiver_id":       receiverID,
 			"sender_name":       senderName,
 			"type":              msgType,
 			"current_user_id":   senderID,
