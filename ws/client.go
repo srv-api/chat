@@ -110,6 +110,7 @@ func (c *Client) ReadPump(processor MessageProcessor, fcmService FCMServiceInter
 			err = fcmService.SendToDevice(fcmToken, map[string]interface{}{
 				"title":       senderName,
 				"body":        messageText,
+				"receiver_id": receiverID,
 				"sender_id":   senderID,
 				"sender_name": senderName,
 				"type":        "chat",
