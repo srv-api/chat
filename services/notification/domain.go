@@ -2,7 +2,6 @@ package notification
 
 import (
 	"context"
-	"srv-api/chat/dto"
 	"srv-api/chat/repositories/notification"
 
 	m "github.com/srv-api/middlewares/middlewares"
@@ -13,7 +12,7 @@ import (
 )
 
 type FcmService interface {
-	SaveOrUpdateToken(req dto.FCMTokenRequest) error
+	SaveOrUpdateToken(userID, token, deviceType string) error
 	GetTokenByUserID(userID string) (string, error)
 	DeleteToken(userID string) error
 	SendToDevice(userFCMToken string, data map[string]interface{}) error

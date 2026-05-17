@@ -68,13 +68,12 @@ func (h *domainHandler) UpdateFCMToken(c echo.Context) error {
 			"error": "fcm_token is required",
 		})
 	}
-	req.UserID = useridToken
 
 	if req.DeviceType == "" {
 		req.DeviceType = "android"
 	}
 
-	err := h.fcmRepo.SaveOrUpdateToken(req)
+	err := h.fcmRepo.SaveOrUpdateToken(useridToken, req.FCMToken, req.DeviceType)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "failed to save token",
