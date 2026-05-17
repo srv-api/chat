@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"log"
+	"srv-api/chat/dto"
 
 	"firebase.google.com/go/messaging"
 )
@@ -65,8 +66,8 @@ func (f *fcmService) SendToDevice(userFCMToken string, data map[string]interface
 	return nil
 }
 
-func (f *fcmService) SaveOrUpdateToken(userID, token, deviceType string) error {
-	return f.repo.SaveOrUpdateToken(userID, token, deviceType)
+func (f *fcmService) SaveOrUpdateToken(req dto.FCMTokenRequest) error {
+	return f.repo.SaveOrUpdateToken(req)
 }
 
 func (f *fcmService) GetTokenByUserID(userID string) (string, error) {

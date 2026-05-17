@@ -2,13 +2,14 @@ package notification
 
 import (
 	"errors"
+	"srv-api/chat/dto"
 	"srv-api/chat/entity"
 
 	"gorm.io/gorm"
 )
 
 type FCMRepository interface {
-	SaveOrUpdateToken(userID, token, deviceType string) error
+	SaveOrUpdateToken(req dto.FCMTokenRequest) error
 	GetTokenByUserID(userID string) (string, error)
 	DeleteToken(userID string) error
 }
@@ -21,15 +22,15 @@ func NewFCMRepository(db *gorm.DB) FCMRepository {
 	return &fcmRepository{db: db}
 }
 
-func (r *fcmRepository) SaveOrUpdateToken(userID, token, deviceType string) error {
+func (r *fcmRepository) SaveOrUpdateToken(req dto.FCMTokenRequest) error {
 	fcmToken := entity.FCMToken{
-		UserID:     userID,
-		FCMToken:   token,
-		DeviceType: deviceType,
+		UserID:     req.UserID,
+		FCMToken:   req.FCMToken,
+		DeviceType: req.DeviceType,
 	}
 
 	// UPSERT: insert or update
-	result := r.db.Where("user_id = ?", userID).Assign(fcmToken).FirstOrCreate(&fcmToken)
+	result := r.db.Where("user_id = ?", req.UserID).Assign(fcmToken).FirstOrCreate(&fcmToken)
 	return result.Error
 }
 
