@@ -1,6 +1,6 @@
 module srv-api/chat
 
-go 1.25.0
+go 1.25.1
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -8,8 +8,8 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.15.1
-	github.com/srv-api/middlewares v0.0.0-20260118094353-3c21604ff12e
-	github.com/srv-api/util v0.0.0-20260118105025-cdb334ac3c2f
+	github.com/srv-api/middlewares v0.0.0-20260413091150-3878b6563895
+	github.com/srv-api/util v0.0.0-20260505065052-f56daad96159
 	google.golang.org/api v0.274.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1

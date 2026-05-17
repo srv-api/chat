@@ -118,10 +118,10 @@ github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w
 github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
 github.com/spiffe/go-spiffe/v2 v2.6.0 h1:l+DolpxNWYgruGQVV0xsfeya3CsC7m8iBzDnMpsbLuo=
 github.com/spiffe/go-spiffe/v2 v2.6.0/go.mod h1:gm2SeUoMZEtpnzPNs2Csc0D/gX33k1xIx7lEzqblHEs=
-github.com/srv-api/middlewares v0.0.0-20260118094353-3c21604ff12e h1:YrxdqVGmjDgR5VzHW2OJ1xVdq32Zpwe8vFng9TNoJOI=
-github.com/srv-api/middlewares v0.0.0-20260118094353-3c21604ff12e/go.mod h1:1Tb4LYh5RHtsaEbchi8RYeiyx5fTQwhsPBo0c+v7tYs=
-github.com/srv-api/util v0.0.0-20260118105025-cdb334ac3c2f h1:9lrI7apxjlkDiwKyFoJq0uaCUYqpnIUGfhMX3aiUInM=
-github.com/srv-api/util v0.0.0-20260118105025-cdb334ac3c2f/go.mod h1:NemSTordgWpBFTP4STuhkWmPc7Sz5d61iZL7ythUqQY=
+github.com/srv-api/middlewares v0.0.0-20260413091150-3878b6563895 h1:F5RxrDG6J5mKJ8U0eB9RLGjK32JaM6ykedr5LGcniJQ=
+github.com/srv-api/middlewares v0.0.0-20260413091150-3878b6563895/go.mod h1:1Tb4LYh5RHtsaEbchi8RYeiyx5fTQwhsPBo0c+v7tYs=
+github.com/srv-api/util v0.0.0-20260505065052-f56daad96159 h1:oZl0Hr9DlYGxQ3lvCA9W5UC7ZGBLKLBSIFkYEzJez3w=
+github.com/srv-api/util v0.0.0-20260505065052-f56daad96159/go.mod h1:1oeopE9PXL4jnI6NlRMcLqIojcJimuWRvo9Hvp+G3lU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
